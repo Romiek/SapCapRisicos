@@ -1,0 +1,123 @@
+{
+	"_version": "1.8.0",
+	"sap.app": {
+		"id": "risicos",
+		"type": "application",
+		"title": "Risicos",
+		"description": "Sample Application",
+		"i18n": "i18n/i18n.properties",
+		"dataSources": {
+			"RisicosService": {
+				"uri": "/risicos/",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "4.0"
+				}
+			}
+		},
+        "-sourceTemplate": {
+            "id": "ui5template.basicSAPUI5ApplicationProject",
+			"-id": "ui5template.smartTemplate",
+			"-version": "1.40.12"
+		}
+	},
+	"sap.ui5": {
+        "dependencies": {
+            "libs": {
+                "sap.fe.templates": {}
+            }
+        },
+		"models": {
+			"i18n": {
+				"type": "sap.ui.model.resource.ResourceModel",
+				"uri": "i18n/i18n.properties"
+			},
+			"": {
+				"dataSource": "RisicosService",
+				"settings": {
+                    "synchronizationMode": "None",
+                    "operationMode": "Server",
+                    "autoExpandSelect" : true,
+                    "earlyRequests": true,
+                    "groupProperties": {
+                        "default": {
+                          "submit": "Auto"
+                        }
+                    }
+				}
+			}
+		},
+        "routing": {
+            "routes": [
+                {
+                    "pattern": ":?query:",
+                    "name": "RisicosList",
+                    "target": "RisicosList"
+                },
+                {
+                    "pattern": "Risicos({key}):?query:",
+                    "name": "RisicosDetails",
+                    "target": "RisicosDetails"
+                }
+            ],
+            "targets": {
+                "RisicosList": {
+                    "type": "Component",
+                    "id": "RisicosList",
+                    "name": "sap.fe.templates.ListReport",
+                    "options": {
+						"settings" : {
+							"entitySet" : "Risicos",
+							"navigation" : {
+								"Risicos" : {
+									"detail" : {
+										"route" : "RisicosDetails"
+										}
+								}
+							}
+						}
+					}
+                },
+                "RisicosDetails": {
+                    "type": "Component",
+                    "id": "RisicosDetails",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings" : {
+                            "entitySet": "Risicos",
+							"navigation" : {
+								"Items": {
+                                    "detail": {
+                                        "route": "RisicoItemsDetails"
+                                    }
+                                }
+							}
+						}
+					}
+                },
+                "RisicoItemsDetails": {
+                    "type": "Component",
+                    "id": "RisicoItemsDetails",
+                    "name": "sap.fe.templates.ObjectPage",
+                    "options": {
+                        "settings" : {
+                            "entitySet": "Risicos_Items"
+                        }
+                    }
+                }
+            }
+        },
+		"contentDensities": {
+			"compact": true,
+			"cozy": true
+		}
+	},
+	"sap.ui": {
+		"technology": "UI5",
+		"fullWidth": false
+	},
+	"sap.fiori": {
+		"registrationIds": [],
+		"archeType": "transactional"
+	}
+}
