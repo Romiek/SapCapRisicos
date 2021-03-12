@@ -7,6 +7,7 @@
   "private": true,
   "dependencies": {
     "@sap/cds": "^4",
+    "@sap/hana-client": "^2.7.23",
     "express": "^4"
   },
   "devDependencies": {
@@ -14,5 +15,15 @@
   },
   "scripts": {
     "start": "cds run"
+  },
+  "cds": {
+    "hana": {
+      "deploy-format": "hdbtable"
+    },
+    "requires": {
+      "db": {
+        "kind": "hana"
+      }
+    }
   }
 }

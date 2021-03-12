@@ -1,83 +1,58 @@
-_schema-version: "3.2"
-ID: myvsapp
-version: 0.0.1
+## Generated mta.yaml based on template version 0.4.0
+## appName = SapCapRisicos
+## language=nodejs; multiTenant=false
+## approuter=
+_schema-version: '3.1'
+ID: SapCapRisicos
+version: 1.0.0
+description: "A simple CAP project."
+parameters:
+  enable-parallel-deployments: true
+   
+build-parameters:
+  before-all:
+   - builder: custom
+     commands:
+      - npm install --production
+      - npx -p @sap/cds-dk cds build --production
 
 modules:
+ # --------------------- SERVER MODULE ------------------------
+ - name: SapCapRisicos-srv
+ # ------------------------------------------------------------
+   type: nodejs
+   path: gen/srv
+   requires:
+    # Resources extracted from CAP configuration
+    - name: SapCapRisicos-db
+   provides:
+    - name: srv-api      # required by consumers of CAP services (e.g. approuter)
+      properties:
+        srv-url: ${default-url}
 
-- name: myvsapp-destination-content
-  type: com.sap.application.content
-  requires:
-  - name: uaa_myvsapp
-    parameters:
-      service-key:
-        name: uaa_myvsapp-key
-  - name: myvsapp_html_repo_host
-    parameters:
-      service-key:
-        name: myvsapp_html_repo_host-key
-  - name: myvsapp-destination-service
-    parameters:
-      content-target: true
-  parameters:
-    content:
-      subaccount:
-        destinations:
-        - Name: myvsapp_htmlrepohost
-          ServiceInstanceName: myvsapp-html5-app-host-service
-          ServiceKeyName: myvsapp_html_repo_host-key
-          sap.cloud.service: myvsapp
-        - Name: myvsapp_tokenexchange
-          Authentication: OAuth2UserTokenExchange
-          ServiceInstanceName: myvsapp-xsuaa-service
-          ServiceKeyName: uaa_myvsapp-key
-          sap.cloud.service: myvsapp
-        existing_destinations_policy: update
-  build-parameters:
-    no-source: true
+ # -------------------- SIDECAR MODULE ------------------------
+ - name: SapCapRisicos-db-deployer
+ # ------------------------------------------------------------
+   type: hdb
+   path: gen/db  
+   parameters:
+     buildpack: nodejs_buildpack
+   requires:
+    # 'hana' and 'xsuaa' resources extracted from CAP configuration
+    - name: SapCapRisicos-db
 
-- name: myvsapp_ui_deployer
-  type: com.sap.application.content
-  path: .
-  requires:
-  - name: myvsapp_html_repo_host
-    parameters:
-      content-target: true
-  build-parameters:
-    build-result: mta_resources
-    requires:
-    - name: webapp
-      artifacts:
-      - webapp-content.zip
-      target-path: mta_resources/
-      
-- name: webapp
-  type: html5
-  path: webapp
-  build-parameters:
-    builder: custom
-    commands:
-        - npm run build
-        - npm run zip
-    build-result: dist  
-    supported-platforms: []
 
 resources:
-- name: myvsapp-destination-service
-  type: org.cloudfoundry.managed-service
-  parameters:
-    service: destination
-    service-name: myvsapp-destination-service
-    service-plan: lite
-- name: myvsapp_html_repo_host
-  type: org.cloudfoundry.managed-service
-  parameters:
-    service: html5-apps-repo
-    service-name: myvsapp-html5-app-host-service
-    service-plan: app-host
-- name: uaa_myvsapp
-  type: org.cloudfoundry.managed-service
-  parameters:
-    path: ./xs-security.json
-    service: xsuaa
-    service-name: myvsapp-xsuaa-service
-    service-plan: application
+ # services extracted from CAP configuration
+ # 'service-plan' can be configured via 'cds.requires.<name>.vcap.plan'
+# ------------------------------------------------------------
+ - name: SapCapRisicos-db
+# ------------------------------------------------------------
+   type: com.sap.xs.hdi-container
+   parameters:
+     service: hana  # or 'hanatrial' on trial landscapes
+     service-plan: hdi-shared
+   properties:
+     hdi-service-name: ${service-name}
+
+
